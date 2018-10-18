@@ -1,0 +1,37 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: $CPU_PLAYER_CONTAINER
+spec:
+  parallelism: 10
+  completions: 100
+  template:
+    metadata:
+      name: player
+    spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: job-label
+                operator: In
+                values:
+                - $CPU_PLAYER_CONTAINER
+            topologyKey: kubernetes.io/hostname
+      containers:
+      - name: player
+        image: 954347443578.dkr.ecr.ap-southeast-2.amazonaws.com/$CPU_PLAYER_CONTAINER:$VERSION_TAG
+        imagePullPolicy: Always
+        env:
+        - name: AWS_ACCESS_KEY_ID
+          value: "$AWS_ACCESS_KEY_ID"
+        - name: AWS_SECRET_ACCESS_KEY
+          value: "$AWS_SECRET_ACCESS_KEY"
+        - name: BUCKET_NAME
+          value: "$BUCKET_NAME"
+        - name: BOARD_SIZE
+          value: "$BOARD_SIZE"
+        securityContext:
+          privileged: true
+      restartPolicy: OnFailure

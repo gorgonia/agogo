@@ -1,0 +1,216 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: ''
+Parameters:
+  KeyName:
+    Type: AWS::EC2::KeyPair::KeyName
+    Default: KEYPAIR
+  ImageId:
+    Type: String
+    Default: ami-d38a4ab1
+    # Default: ami-228a4a40 NON-HVM XENIAL
+  InstanceType:
+    Type: String
+    Default: t2.micro
+
+Resources:
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 172.17.0.0/16
+      InstanceTenancy: default
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+
+  Subnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: 172.17.1.0/24
+      AvailabilityZone: ap-southeast-2b
+      VpcId: !Ref VPC
+
+  Subnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: 172.17.2.0/24
+      AvailabilityZone: ap-southeast-2a
+      VpcId: !Ref VPC
+
+  SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: latencytest
+      VpcId: !Ref VPC
+
+  InboundSGEntry1:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref SecurityGroup
+      IpProtocol: tcp
+      FromPort: 22
+      ToPort: 22
+      CidrIp: 124.169.106.141/24
+
+  InboundSGEntry2:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref SecurityGroup
+      IpProtocol: tcp
+      FromPort: 22
+      ToPort: 22
+      CidrIp: 172.17.1.0/24
+
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+      - Key: Name
+        Value: whatever
+
+  VPCGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref VPC
+      InternetGatewayId: !Ref InternetGateway
+
+  Route1:
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      RouteTableId: !Ref RouteTable
+      GatewayId: !Ref InternetGateway
+
+  NetworkAcl:
+    Type: AWS::EC2::NetworkAcl
+    Properties:
+      VpcId: !Ref VPC
+
+  ACL1:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties:
+      CidrBlock: 0.0.0.0/0
+      Egress: 'true'
+      Protocol: "-1"
+      RuleAction: allow
+      RuleNumber: '100'
+      NetworkAclId: !Ref NetworkAcl
+
+  ACL2:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties:
+      CidrBlock: 0.0.0.0/0
+      Protocol: "-1"
+      RuleAction: allow
+      RuleNumber: '100'
+      NetworkAclId: !Ref NetworkAcl
+
+  SubnetACL1:
+    Type: AWS::EC2::SubnetNetworkAclAssociation
+    Properties:
+      NetworkAclId: !Ref NetworkAcl
+      SubnetId: !Ref Subnet1
+
+  SubnetACL2:
+    Type: AWS::EC2::SubnetNetworkAclAssociation
+    Properties:
+      NetworkAclId: !Ref NetworkAcl
+      SubnetId: !Ref Subnet2
+
+  RouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+
+  SubnetRoute1:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref RouteTable
+      SubnetId: !Ref Subnet1
+
+  SubnetRoute2:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref RouteTable
+      SubnetId: !Ref Subnet2
+
+  Compute:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !Ref ImageId
+      # InstanceType: !Ref InstanceType
+      InstanceType: INSTANCETYPE
+      # SecurityGroups:
+      #   - !Ref SecurityGroup
+      KeyName: !Ref KeyName
+      NetworkInterfaces:
+      - SubnetId: !Ref Subnet1
+        AssociatePublicIpAddress: 'true'
+        DeviceIndex: '0'
+        GroupSet:
+        - !Ref SecurityGroup
+      UserData:
+          Fn::Base64: !Sub |
+            #!bin/bash -xe
+            apt-get update
+            apt-get -y install graphviz gv awscli zip python-setuptools
+            mkdir aws-cfn-bootstrap-latest
+            curl https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz | tar xz -C aws-cfn-bootstrap-latest --strip-components 1
+            easy_install aws-cfn-bootstrap-latest
+
+            cd /tmp
+            wget https://dl.google.com/go/go1.10.linux-amd64.tar.gz
+            tar -xvf go1.10.linux-amd64.tar.gz
+            mv go /usr/local
+
+            export PATH=$PATH:/usr/local/go/bin
+            export GOPATH=/home/ubuntu/go
+            export AWS_ACCESS_KEY_ID=EC2KEY
+            export AWS_SECRET_ACCESS_KEY=EC2SECRET
+            export AWS_DEFAULT_REGION=ap-southeast-2
+            export RUNDATE=`date +%Y-%m-%d-%Ih%Mm`
+
+            cat << EOF > /tmp/deploy.sh
+            #!/bin/bash -xe
+            go get gorgonia.org/gorgonia
+            go get gorgonia.org/tensor
+            go get gorgonia.org/dawson
+            go get github.com/gogo/protobuf/gogoproto
+            go get github.com/golang/protobuf/proto
+            go get github.com/google/flatbuffers/go
+            cd /home/ubuntu
+            git clone https://GITUSER:GITPASS@github.com/chewxy/agogo.git
+            cd /home/ubuntu/agogo
+            cd $GOPATH/src/gorgonia.org/gorgonia
+            git checkout GORGBRANCH
+            git pull
+            cd $GOPATH/src/gorgonia.org/tensor
+            git checkout TENSORBRANCH
+            git pull
+            cd /home/ubuntu/agogo/COMPONENT
+            go test -tags=avx -run=. -v -trace=test-trace-COMPONENT-INSTANCETYPE-$RUNDATE.out | tee stdout-trace-COMPONENT-INSTANCETYPE-$RUNDATE
+            go test -run=. -v -cpuprofile=test-cpu-COMPONENT-INSTANCETYPE-$RUNDATE.prof | tee stdout-cpuprofile-COMPONENT-INSTANCETYPE-$RUNDATE
+            zip test-COMPONENT-INSTANCETYPE-$RUNDATE.zip test-* stdout-*
+            EOF
+
+            chmod u+x /tmp/deploy.sh
+
+            if /tmp/deploy.sh >> /tmp/deploy-$RUNDATE.out; then
+              state=0
+              cd /home/ubuntu/agogo/COMPONENT
+              aws s3 cp test-COMPONENT-INSTANCETYPE-$RUNDATE.zip s3://agogo-testing/
+              aws s3 cp /tmp/deploy-$RUNDATE.out s3://agogo-testing/
+            else
+              state=1
+              cd /tmp
+              aws s3 cp deploy-$RUNDATE.out s3://agogo-testing/
+            fi
+
+            /usr/local/bin/cfn-signal -e $state --stack ${AWS::StackName} --resource Compute --region ${AWS::Region}
+      Tags:
+        -
+          Key: role
+          Value: compute
+    CreationPolicy:
+      ResourceSignal:
+        Count: 1
+        Timeout: PT20M

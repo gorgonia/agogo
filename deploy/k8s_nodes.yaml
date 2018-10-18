@@ -1,0 +1,17 @@
+apiVersion: kops/v1alpha2
+kind: InstanceGroup
+metadata:
+  creationTimestamp: 2018-05-01T12:11:25Z
+  labels:
+    kops.k8s.io/cluster: $NAME
+  name: nodes-$ZONE
+spec:
+  image: kope.io/k8s-1.8-debian-jessie-amd64-hvm-ebs-2018-02-08
+  machineType: $SLAVETYPE
+  maxSize: $SLAVES
+  minSize: $SLAVES
+  nodeLabels:
+    kops.k8s.io/instancegroup: nodes-$ZONE
+  role: Node
+  subnets:
+  - $ZONE
