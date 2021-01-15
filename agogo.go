@@ -15,6 +15,9 @@ import (
 	"gorgonia.org/tensor"
 )
 
+// AZ is the top level structure and the entry point of the API.
+// It it a wrapper around the MTCS and the NeeuralNework that composes the algorithm.
+// AZ stands for AlphaZero
 type AZ struct {
 	// state
 	Arena
@@ -33,6 +36,8 @@ type AZ struct {
 	outEnc OutputEncoder
 }
 
+// New AlphaZero structure. It takes a game state (implementing the board, rules, etc.)
+// and a configuration to apply to the MCTS and the neural network
 func New(g game.State, conf Config) *AZ {
 	if !conf.NNConf.IsValid() {
 		panic("NNConf is not valid. Unable to proceed")
@@ -163,6 +168,7 @@ func (a *AZ) Learn(iters, episodes, nniters, arenaGames int) error {
 	return nil
 }
 
+// Save learning into filenamee
 func (a *AZ) Save(filename string) error {
 	f, err := os.OpenFile(filename, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0544)
 	if err != nil {
@@ -174,6 +180,7 @@ func (a *AZ) Save(filename string) error {
 	return enc.Encode(a.A.NN)
 }
 
+// Load the Alpha Zero structure from a filename
 func (a *AZ) Load(filename string) error {
 	f, err := os.Open(filename)
 	if err != nil {

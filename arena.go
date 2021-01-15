@@ -15,6 +15,8 @@ import (
 	"github.com/gorgonia/agogo/mcts"
 )
 
+// Arena represents a game arena
+// Arena fulfils the interface game.MetaState
 type Arena struct {
 	r    *rand.Rand
 	game game.State
@@ -67,6 +69,7 @@ func MakeArena(g game.State, a, b Dualer, conf mcts.Config, enc GameEncoder, aug
 	}
 }
 
+// NewArena makes an arena an returns a pointer to the Arena
 func NewArena(g game.State, a, b Dualer, conf mcts.Config, enc GameEncoder, aug Augmenter, name string) *Arena {
 	ar := MakeArena(g, a, b, conf, enc, aug, name)
 	ar.logger = log.New(&ar.buf, "", log.Ltime)
@@ -172,12 +175,22 @@ func (a *Arena) Play(record bool, enc OutputEncoder, aug Augmenter) (winner game
 	return game.Player(game.None), examples
 }
 
-func (a *Arena) Epoch() int                  { return a.epoch }
-func (a *Arena) GameNumber() int             { return a.gameNumber }
-func (a *Arena) Name() string                { return a.name }
-func (a *Arena) Score(p game.Player) float64 { return float64(a.game.Score(p)) }
-func (a *Arena) State() game.State           { return a.game }
+// Epoch returns the current Epoch
+func (a *Arena) Epoch() int { return a.epoch }
 
+// GameNumber returns the
+func (a *Arena) GameNumber() int { return a.gameNumber }
+
+// Name of the game
+func (a *Arena) Name() string { return a.name }
+
+// Score of the player p
+func (a *Arena) Score(p game.Player) float64 { return float64(a.game.Score(p)) }
+
+// State of the game
+func (a *Arena) State() game.State { return a.game }
+
+// Log the MCTS of both players into w
 func (a *Arena) Log(w io.Writer) {
 	fmt.Fprintf(w, a.buf.String())
 	fmt.Fprintln(w, "\nA:\n")
