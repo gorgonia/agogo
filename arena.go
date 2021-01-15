@@ -124,7 +124,10 @@ func (a *Arena) Play(record bool, enc OutputEncoder, aug Augmenter) (winner game
 
 		// policy, value := a.currentPlayer.Infer(a.game)
 		// log.Printf("\t\tPlayer %v made Move %v | %1.1v %1.1v", a.currentPlayer.Player, best, policy, value)
-		a.game = a.game.Apply(game.PlayerMove{a.currentPlayer.Player, best})
+		a.game = a.game.Apply(game.PlayerMove{
+			Player: a.currentPlayer.Player,
+			Single: best,
+		})
 		a.switchPlayer()
 		if enc != nil {
 			enc.Encode(a)
@@ -193,9 +196,9 @@ func (a *Arena) State() game.State { return a.game }
 // Log the MCTS of both players into w
 func (a *Arena) Log(w io.Writer) {
 	fmt.Fprintf(w, a.buf.String())
-	fmt.Fprintln(w, "\nA:\n")
+	fmt.Fprintf(w, "\nA:\n\n")
 	fmt.Fprintln(w, a.A.MCTS.Log())
-	fmt.Fprintln(w, "\nB:\n")
+	fmt.Fprintf(w, "\nB:\n\n")
 	fmt.Fprintln(w, a.B.MCTS.Log())
 }
 
