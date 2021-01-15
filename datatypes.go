@@ -8,6 +8,9 @@ import (
 	"github.com/gorgonia/agogo/mcts"
 )
 
+// Config for the AZ structure.
+// It holds attributes that impacts the MCTS and the Neural Network
+// as well as object that facilitates the interactions with the end-user (eg: OutputEncoder).
 type Config struct {
 	Name            string
 	NNConf          dual.Config
