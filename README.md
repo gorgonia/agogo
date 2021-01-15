@@ -15,9 +15,11 @@ The contract specifies the description of a game state.
 
 In this package, the contract is a Go interface declared in the `game` package: [`State`](https://pkg.go.dev/github.com/gorgonia/agogo/game#State).
 
-### Ubiquitous language
+### Description of some concepts/ubiquitous language
 
-Each player of the game is an [`Agent`](https://pkg.go.dev/github.com/gorgonia/agogo#Agent), and in a `game`, two `Agents` are playing in an [`Arena`](https://pkg.go.dev/github.com/gorgonia/agogo@v0.1.0#Arena)
+- In the `agogo` package, each player of the game is an [`Agent`](https://pkg.go.dev/github.com/gorgonia/agogo#Agent), and in a `game`, two `Agents` are playing in an [`Arena`](https://pkg.go.dev/github.com/gorgonia/agogo@v0.1.0#Arena)
+
+- The `game` package is loosely coupled with the AlphaZero algorithm and describes a game's behavior (and not what a game is). The behavior is expressed as a set of functions to operate on a [`State`](https://pkg.go.dev/github.com/gorgonia/agogo/game#State) of the game. A State is an interface that represents the current game state *as well* as the allowed interactions. The interaction is made by an object [`Player`](https://pkg.go.dev/github.com/gorgonia/agogo/game#Player) who is operating a [`PlayerMove`](https://pkg.go.dev/github.com/gorgonia/agogo/game#PlayerMove). The implementer's responsibility is to code the game's rules by creating an object that fulfills the State contract and implements the allowed moves.
 
 ### Training process
 
@@ -42,11 +44,10 @@ The steps to play against the algorithm are:
 
 ## Examples
 
-Four board games are implemented so far. Each of them is defined as a subpackage of `game`: 
-
+Four board games are implemented so far. Each of them is defined as a subpackage of `game`:
 
 - [`mnk`](https://pkg.go.dev/github.com/gorgonia/agogo/game/mnk) for [m,n,k](https://en.wikipedia.org/wiki/M,n,k-game) game.
-- [`wq`](https://pkg.go.dev/github.com/gorgonia/agogo/game/mnk) is the game of Go (围碁)
+- [`wq`](https://pkg.go.dev/github.com/gorgonia/agogo/game/mnk) is the game of [Go](https://en.wikipedia.org/wiki/Go_(game)) (围碁)
 - `c4`
 - `komi`
 
