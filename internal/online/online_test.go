@@ -1,7 +1,6 @@
 package online
 
-import "testing"
-
+/*
 func TestNewLayer(t *testing.T) {
 	visibles := []Desc{
 		{2, 2, 3, 2, 2, true},
@@ -17,3 +16,4 @@ func TestNewLayer(t *testing.T) {
 		}
 	}
 }
+*/
