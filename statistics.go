@@ -35,6 +35,7 @@ func (s *Statistics) update(A *Agent) {
 	s.Draws[aname] = append(s.Draws[aname], A.Draw)
 }
 
+// Dump the statistics in filename using a CSV format
 func (s *Statistics) Dump(filename string) error {
 	f, err := os.OpenFile(filename, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
 	if err != nil {
