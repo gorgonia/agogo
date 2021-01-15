@@ -139,7 +139,7 @@ func (a *AZ) Learn(iters, episodes, nniters, arenaGames int) error {
 		a.logger.Printf("Playing Arena")
 		a.logger.SetPrefix("\t")
 		for a.gameNumber = 0; a.gameNumber < arenaGames; a.gameNumber++ {
-			a.logger.Printf("Playing game number", a.gameNumber)
+			a.logger.Printf("Playing game number %d", a.gameNumber)
 			a.Play(false, a.outEnc, nil)
 			a.game.Reset()
 		}
