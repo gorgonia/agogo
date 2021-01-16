@@ -40,6 +40,7 @@ The steps to play against the algorithm are:
 
 - Creating an `AZ` object
 - Loading the trained model (by calling the [`Read`](https://pkg.go.dev/github.com/gorgonia/agogo#AZ.Read) method)
+- Switching the agent to inference mode via the [`SwitchToInference`](https://pkg.go.dev/github.com/gorgonia/agogo#Agent.SwitchToInference) method
 - Get the AI move by calling the [`Search`](https://pkg.go.dev/github.com/gorgonia/agogo#Agent.Search) method and applying the move to the game manually
 
 ## Examples
