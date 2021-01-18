@@ -252,7 +252,7 @@ func TestCloneEq(t *testing.T) {
 
 func TestBoard_Format(t *testing.T) {
 	g := New(7, 7, 3)
-	it := makeIterator(g.board, g.m, g.n)
+	it := game.MakeIterator(g.board, g.m, g.n)
 	it[1][1] = White
 	it[3][3] = Black
 	it[1][5] = White

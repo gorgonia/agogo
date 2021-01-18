@@ -10,6 +10,7 @@ import (
 	"github.com/gorgonia/agogo/mcts"
 )
 
+// An Agent is a player, AI or Human
 type Agent struct {
 	NN     *dual.Dual
 	MCTS   *mcts.MCTS
@@ -35,7 +36,7 @@ func newAgent(a Dualer) *Agent {
 	return retVal
 }
 
-// SwitchTOInference uses the inference mode neural network.
+// SwitchToInference uses the inference mode neural network.
 func (a *Agent) SwitchToInference(g game.State) (err error) {
 	a.Lock()
 	a.inferer = make(chan Inferer, numCPU)
