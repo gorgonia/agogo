@@ -120,6 +120,9 @@ func (a *AZ) Learn(iters, episodes, nniters, arenaGames int) error {
 			ex = ex[:a.maxExamples]
 		}
 		Xs, Policies, Values, batches := a.prepareExamples(ex)
+		if batches == 0 {
+			return errors.New("batches is nil, probably too few examples regarding the batchsize")
+		}
 
 		// // create a new DualNet for B
 		// a.B.NN = dual.New(a.nnConf)
