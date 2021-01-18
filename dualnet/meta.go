@@ -13,14 +13,16 @@ import (
 )
 
 // Train is a basic trainer.
+//
+// BUG(gorgonia): One instance of the machie is created per batch; this should be fixed once the reset method is fixed. See #2 for more info.
 func Train(d *Dual, Xs, policies, values *tensor.Dense, batches, iterations int) error {
-	m := G.NewTapeMachine(d.g, G.BindDualValues(d.Model()...))
 	model := G.NodesToValueGrads(d.Model())
 	solver := G.NewVanillaSolver(G.WithLearnRate(0.1))
 	var s slicer
 	for i := 0; i < iterations; i++ {
 		// var cost float32
 		for bat := 0; bat < batches; bat++ {
+			m := G.NewTapeMachine(d.g, G.BindDualValues(d.Model()...))
 			batchStart := bat * d.Config.BatchSize
 			batchEnd := batchStart + d.Config.BatchSize
 
@@ -38,7 +40,7 @@ func Train(d *Dual, Xs, policies, values *tensor.Dense, batches, iterations int)
 			if err := solver.Step(model); err != nil {
 				return err
 			}
-			m.Reset()
+			//m.Reset()
 			tensor.ReturnTensor(Xs2)
 			tensor.ReturnTensor(π)
 			tensor.ReturnTensor(v)
