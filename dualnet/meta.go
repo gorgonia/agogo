@@ -15,6 +15,7 @@ import (
 // Train is a basic trainer.
 func Train(d *Dual, Xs, policies, values *tensor.Dense, batches, iterations int) error {
 	m := G.NewTapeMachine(d.g, G.BindDualValues(d.Model()...))
+	defer m.Close()
 	model := G.NodesToValueGrads(d.Model())
 	solver := G.NewVanillaSolver(G.WithLearnRate(0.1))
 	var s slicer
