@@ -23,15 +23,17 @@ type Agent struct {
 	Draw float32
 	sync.Mutex
 
-	name    string
-	actions int
-	inferer chan Inferer
-	err     error
+	name     string
+	actions  int
+	inferer  chan Inferer
+	err      error
+	inferers []Inferer
 }
 
 func newAgent(a Dualer) *Agent {
 	retVal := &Agent{
-		NN: a.Dual(),
+		NN:       a.Dual(),
+		inferers: make([]Inferer, 0),
 	}
 	return retVal
 }
@@ -46,6 +48,7 @@ func (a *Agent) SwitchToInference(g game.State) (err error) {
 		if inf, err = dual.Infer(a.NN, g.ActionSpace(), false); err != nil {
 			return err
 		}
+		a.inferers = append(a.inferers, inf)
 		a.inferer <- inf
 	}
 	// a.NN = nil // remove old NN
@@ -88,7 +91,7 @@ func (a *Agent) NNOutput(g game.State) (policy []float32, value float32, err err
 func (a *Agent) Close() error {
 	close(a.inferer)
 	var allErrs manyErr
-	for inferer := range a.inferer {
+	for _, inferer := range a.inferers {
 		if err := inferer.Close(); err != nil {
 			allErrs = append(allErrs, err)
 		}
