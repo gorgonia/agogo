@@ -115,7 +115,10 @@ func main() {
     // Create the AlphaZero structure 
     a := agogo.New(g, conf)
     // Launch the learning process
-    a.Learn(5, 30, 200, 30) // 5 epochs, 50 episode, 100 NN iters, 100 games.
+    err := a.Learn(5, 50, 100, 100) // 5 epochs, 50 episode, 100 NN iters, 100 games.
+    if err != nil {
+        log.Println(err)
+    }
     // Save the model
      a.Save("example.model")
 }
