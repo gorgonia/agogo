@@ -189,3 +189,16 @@ func main() {
     // ⎢ · · · ⎥
 }
 ```
+
+## Misc
+
+[A Funny Thing Happened On The Way To Reimplementing AlphaGo](https://www.youtube.com/watch?v=nk87zsxpF1A) -  A talk by @chewxy (one of the authors) about this specific implementation
+
+## Credits
+
+Original implementation credits to
+
+- [@cfgt](https://github.com/cfgt)
+- [@garethseneque](https://twitter.com/garethseneque)
+- [@ynqa](https://github.com/ynqa)
+- [@chewxy](https://github.com/chewxy)
