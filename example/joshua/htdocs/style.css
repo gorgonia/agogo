@@ -1,0 +1,20 @@
+body{
+    background-color:  #191F2B;
+}
+
+#tic-tac-toe-board {
+    display: block;
+    margin: 0 auto;
+    background:  #191F2B;
+  }
+  
+  .canvas-wrapper {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 100%;
+  }
+  
+  .canvas-wrapper-parent {
+    transform-style: preserver-3d;
+  }
